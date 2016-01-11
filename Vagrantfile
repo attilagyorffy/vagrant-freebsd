@@ -13,6 +13,10 @@ Vagrant.configure(2) do |config|
   # Every Vagrant development environment requires a box. You can search for
   # boxes at https://atlas.hashicorp.com/search.
   config.vm.box = "attilagyorffy/FreeBSD-10.2-RELEASE-amd64"
+
+  # Explicitly set the SSH shell to use. Given that vagrant is using `bash -l`
+  # as the default (which is not installed on the default box) we override this.
+  # See https://docs.vagrantup.com/v2/vagrantfile/ssh_settings.html
   config.ssh.shell = '/bin/sh'
 
   # Disable automatic box update checking. If you disable this, then
