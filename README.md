@@ -1,6 +1,6 @@
 # vagrant-freebsd
 
-This is a base FreeBSD 10.2-RELEASE box in Vagrant using the VMWare Fusion provider
+This is a base FreeBSD 10.2-RELEASE box in Vagrant using the [VMWare Fusion provider](https://www.vagrantup.com/vmware).
 
 # VM contents
 
