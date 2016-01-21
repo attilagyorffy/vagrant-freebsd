@@ -73,4 +73,45 @@ Vagrant.configure(2) do |config|
   # config.vm.provision "ansible" do |ansible|
     # ansible.playbook = "ansible/site.yml"
   # end
+
+  # Enable provisioning with a shell script.
+  # See https://forums.freebsd.org/threads/how-to-setup-a-git-repository.10810/
+  config.vm.provision "shell", inline: <<-SHELL
+    sudo pkg upgrade -y
+    sudo pkg install -y git
+
+    # Install fish shell
+    sudo pkg install -y fish
+
+    # Create a git user and group with uid and gid as 9418
+    sudo pw groupadd -n git -g 9418
+    # Create a git user, set home as /git/ and set git-shell to be the shell of choice
+    sudo pw useradd -n git -u 9418 -g git -c git -d /git -s /usr/local/libexec/git-core/git-shell -h -
+
+    # Create attila user as a member of wheel
+    sudo pw useradd attila -g wheel -s /usr/local/bin/fish -d /home/attila -m
+    # Ensure attila is part of the git group
+    sudo pw usermod attila -G git
+
+    # Create and set permissions on the directory that will hold repos
+    sudo mkdir -p /git/base
+    sudo chown git:git /git/base
+    sudo chmod 755 /git
+    sudo chmod 775 /git/base
+
+    # We'll be using SSH keys for authenication
+    sudo mkdir /git/.ssh
+    sudo chmod 700 /git/.ssh
+    sudo touch /git/.ssh/authorized_keys
+
+    # Add attila's key to the authorized_keys:
+    sudo grep -q "attila@fukiBookPro.local" /git/.ssh/authorized_keys; [ $? -eq 0 ] && echo "authorized keys OK" || echo '#{File.read(File.expand_path('~/.ssh/id_rsa.pub'))}' | sudo tee -a /git/.ssh/authorized_keys
+
+    sudo chmod 600 /git/.ssh/authorized_keys
+    sudo chown -R git:git /git/.ssh
+
+    # Create a test repo:
+    sudo -H -u git mkdir -p /git/base/test.git
+    cd /git/base/test.git; sudo -H -u git git init --bare --shared
+  SHELL
 end
